@@ -1,6 +1,12 @@
 import { Session, User } from "@supabase/supabase-js";
 import { useRouter, useSegments, SplashScreen } from "expo-router";
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import {
+	createContext,
+	useContext,
+	useEffect,
+	useState,
+	useCallback,
+} from "react";
 
 import { supabase } from "@/config/supabase";
 
@@ -14,6 +20,7 @@ type SupabaseContextProps = {
 	signInWithPassword: (email: string, password: string) => Promise<void>;
 	signOut: () => Promise<void>;
 	onLayoutRootView: () => Promise<void>;
+	getCategories: () => Promise<{ success: boolean; data?: any[]; message?: string }> | undefined;
 };
 
 type SupabaseProviderProps = {
@@ -24,10 +31,11 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
 	user: null,
 	session: null,
 	initialized: false,
-	signUp: async () => { },
-	signInWithPassword: async () => { },
-	signOut: async () => { },
-	onLayoutRootView: async () => { },
+	signUp: async () => {},
+	signInWithPassword: async () => {},
+	signOut: async () => {},
+	onLayoutRootView: async () => {},
+	getCategories: async () => ({ success: false, message: "Not implemented" }),
 });
 
 export const useSupabase = () => useContext(SupabaseContext);
@@ -67,10 +75,34 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		}
 	};
 
+	const getCategories = async () => {
+		try {
+			const { data, error } = await supabase.from("Categories").select("*");
+			if (error) {
+				throw new Error(error.message);
+			}
+
+			return { success: true, data };
+		} catch (err: unknown) {
+			if (err instanceof Error) {
+				console.error(
+					"Erreur lors de la récupération des catégories:",
+					err.message,
+				);
+				return { success: false, message: err.message };
+			}
+
+			console.error("Erreur inconnue");
+			return { success: false, message: "Erreur inconnue" };
+		}
+	};
+
 	useEffect(() => {
 		async function prepare() {
 			try {
-				const { data: { session } } = await supabase.auth.getSession();
+				const {
+					data: { session },
+				} = await supabase.auth.getSession();
 				setSession(session);
 				setUser(session ? session.user : null);
 				setInitialized(true);
@@ -80,7 +112,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 					setUser(session ? session.user : null);
 				});
 
-				await new Promise(resolve => setTimeout(resolve, 100));
+				await new Promise((resolve) => setTimeout(resolve, 100));
 			} catch (e) {
 				console.warn(e);
 			} finally {
@@ -123,6 +155,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				signInWithPassword,
 				signOut,
 				onLayoutRootView,
+				getCategories,
 			}}
 		>
 			{children}
