@@ -1,5 +1,6 @@
 import { Tabs } from "expo-router";
 import React from "react";
+import { Image } from "react-native";
 
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/lib/useColorScheme";
@@ -24,8 +25,30 @@ export default function ProtectedLayout() {
 				tabBarShowLabel: false,
 			}}
 		>
-			<Tabs.Screen name="index" options={{ title: "Home" }} />
-			<Tabs.Screen name="settings" options={{ title: "Settings" }} />
+			<Tabs.Screen
+				name="index"
+				options={{
+					title: "Home",
+					tabBarIcon: ({ color, size }) => (
+						<Image
+							source={require("@/assets/card.png")}
+							style={{ width: size, height: size, tintColor: color }}
+						/>
+					),
+				}}
+			/>
+			<Tabs.Screen
+				name="settings"
+				options={{
+					title: "Settings",
+					tabBarIcon: ({ color, size }) => (
+						<Image
+							source={require("@/assets/profile.png")}
+							style={{ width: size, height: size, tintColor: color }}
+						/>
+					),
+				}}
+			/>
 		</Tabs>
 	);
 }
