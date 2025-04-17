@@ -28,6 +28,7 @@ type SupabaseContextProps = {
 		question: string,
 		answer: string,
 	) => Promise<void>;
+	createDecks: (category: string, title: string) => Promise<void>;
 	getCards: () =>
 		| Promise<{ success: boolean; data?: any[]; message?: string }>
 		| undefined;
@@ -47,6 +48,7 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
 	onLayoutRootView: async () => {},
 	getCategories: async () => ({ success: false, message: "Not implemented" }),
 	createCard: async () => {},
+	createDecks: async () => {},
 	getCards: async () => ({ success: false, message: "Not implemented" }),
 });
 
@@ -120,6 +122,19 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 			category: category,
 			question: question,
 			answer: answer,
+			user_id: user?.id,
+		});
+		if (error) {
+			throw error;
+		}
+	};
+
+	const createDecks = async (category: string, title: string) => {
+		const { data: userData, error: userError } = await supabase.auth.getUser();
+		const user = userData.user;
+		const { error } = await supabase.from("Decks").insert({
+			category: category,
+			title: title,
 			user_id: user?.id,
 		});
 		if (error) {
@@ -210,6 +225,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				onLayoutRootView,
 				getCategories,
 				createCard,
+				createDecks,
 				getCards,
 			}}
 		>

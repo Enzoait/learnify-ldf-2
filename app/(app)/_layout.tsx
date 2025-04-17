@@ -57,7 +57,45 @@ export default function AppLayout() {
 				options={{
 					presentation: "modal",
 					headerShown: true,
-					headerTitle: "Modal",
+					headerTitle: "Créer une carte",
+					headerStyle: {
+						backgroundColor:
+							colorScheme === "dark"
+								? colors.dark.background
+								: colors.light.background,
+					},
+					headerTintColor:
+						colorScheme === "dark"
+							? colors.dark.foreground
+							: colors.light.foreground,
+					gestureEnabled: true,
+				}}
+			/>
+			<Stack.Screen
+				name="cardspage"
+				options={{
+					presentation: "modal",
+					headerShown: true,
+					headerTitle: "Cartes",
+					headerStyle: {
+						backgroundColor:
+							colorScheme === "dark"
+								? colors.dark.background
+								: colors.light.background,
+					},
+					headerTintColor:
+						colorScheme === "dark"
+							? colors.dark.foreground
+							: colors.light.foreground,
+					gestureEnabled: true,
+				}}
+			/>
+			<Stack.Screen
+				name="createdeck"
+				options={{
+					presentation: "modal",
+					headerShown: true,
+					headerTitle: "Créer un deck",
 					headerStyle: {
 						backgroundColor:
 							colorScheme === "dark"
