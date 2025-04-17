@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -7,86 +7,113 @@ import {
   FlatList,
   ScrollView,
   Dimensions,
+  useColorScheme,
 } from "react-native";
-import Animated, { FadeInRight } from "react-native-reanimated";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { H1 } from "@/components/ui/typography";
-import { getUserQuizzesWithCategories } from "@/services/supabaseQuizService";
+import { getUserQuizzesWithCategories, updateQuizInDB, deleteQuizFromDB } from "@/services/supabaseQuizService";
 import { Image } from "@/components/image";
+import { useFocusEffect } from "@react-navigation/native";
+import { QuizCard } from "@/components/quizCard";
+
+interface Question {
+  question: string;
+  options: string[];
+  correctOptions: number[];
+}
 
 interface Quiz {
   id: number;
   title: string;
-  questions: { options: string[] }[];
-  category_id: number;
+  questions: Question[];
+  categ_id: number;
   Categories: {
     id: number;
     title: string;
   };
+  userStats?: {
+    progress: number;
+    tryNumber: number;
+    lastTried: string | null;
+  };
 }
 
 export default function QCM(): JSX.Element {
-  const [quizzesByCategory, setQuizzesByCategory] = useState<{
-    [key: string]: Quiz[];
-  }>({});
+  const [quizzesByCategory, setQuizzesByCategory] = useState<{ [key: string]: Quiz[] }>({});
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await getUserQuizzesWithCategories();
-      if (result.success) {
-        const grouped: { [key: string]: Quiz[] } = {};
-        result?.data?.forEach((quiz: Quiz) => {
-          const category = quiz.Categories?.title || "Sans catégorie";
-          if (!grouped[category]) grouped[category] = [];
-          grouped[category].push(quiz);
-        });
-        setQuizzesByCategory(grouped);
-      }
-      setLoading(false);
-    };
-
-    fetchData();
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const result = await getUserQuizzesWithCategories();
+    if (result.success && Array.isArray(result.data)) {
+      const grouped: { [key: string]: Quiz[] } = {};
+      result.data.forEach((rawQuiz: any) => {
+        const categoryTitle = rawQuiz.Categories?.title || "Sans catégorie";
+        const quiz: Quiz = {
+          id: rawQuiz.id,
+          title: rawQuiz.title,
+          categ_id: rawQuiz.categ_id,
+          questions: typeof rawQuiz.questions === "string"
+            ? JSON.parse(rawQuiz.questions)
+            : rawQuiz.questions || [],
+          Categories: rawQuiz.Categories || { id: 0, title: "Sans catégorie" },
+          userStats: rawQuiz.userStats,
+        };
+        if (!grouped[categoryTitle]) grouped[categoryTitle] = [];
+        grouped[categoryTitle].push(quiz);
+      });
+      setQuizzesByCategory(grouped);
+    }
+    setLoading(false);
   }, []);
 
-  interface Question {
-    question: string;
-    options: string[];
-    correctOptions: number[];
-  }
-
-  const getTotalOptions = (questions: Question[] | undefined): number => {
-    console.log(typeof questions);
-    questions = jsondecode(questions);
-    if (!Array.isArray(questions)) return 0;
-    return questions.reduce((sum, q) => sum + (q.options?.length || 0), 0);
-  };
-
-
-
-  const renderQuizCard = (quiz: Quiz): JSX.Element => (
-    <Animated.View
-      entering={FadeInRight}
-      style={styles.cardWrapper}
-      key={quiz.id}
-    >
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => router.push(`/qcm/${quiz.id}`)}
-      >
-        <Text style={styles.cardTitle}>{quiz.title}</Text>
-        <Text style={styles.cardMeta}>
-          {getTotalOptions(quiz.questions)} options
-        </Text>
-      </TouchableOpacity>
-    </Animated.View>
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [fetchData])
   );
 
+  const getTotalQuestions = (questions: Question[]): number => {
+    if (!Array.isArray(questions)) return 0;
+    return questions.length;
+  };
+
+  const handleDelete = async (quizId: number) => {
+    await deleteQuizFromDB(quizId);
+    fetchData();
+  };
+
+  const renderQuizCard = (quiz: Quiz): JSX.Element => {
+    const questionCount = getTotalQuestions(quiz.questions);
+    const progress = quiz?.userStats?.progress || 0;
+    const tryNumber = quiz?.userStats?.tryNumber || 0;
+    const lastTried = quiz?.userStats?.lastTried;
+    return (
+      <QuizCard
+        key={quiz.id}
+        id={quiz.id}
+        title={quiz.title}
+        questionCount={questionCount}
+        progress={progress}
+        tryNumber={tryNumber}
+        lastTried={lastTried}
+        onDelete={() => handleDelete(quiz.id)}
+        onEdit={() => router.push(`/qcm/edit/${quiz.id}`)}
+      />
+    );
+  };
+
+  const categories = Object.keys(quizzesByCategory);
+  const displayedCategories = selectedCategory ? [selectedCategory] : categories;
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isDark && styles.containerDark]}>
       <TouchableOpacity
         onPress={() => router.push("/qcm/create")}
         style={[styles.floatingButton, { top: insets.top + 16 }]}
@@ -96,14 +123,33 @@ export default function QCM(): JSX.Element {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <H1 style={styles.title}>Mes Quiz</H1>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
+          <TouchableOpacity onPress={() => setSelectedCategory(null)} style={styles.categoryButton}>
+            <Text style={styles.categoryButtonText}>Toutes</Text>
+          </TouchableOpacity>
+          {categories.map((category) => (
+            <TouchableOpacity
+              key={category}
+              onPress={() => setSelectedCategory(category)}
+              style={[
+                styles.categoryButton,
+                selectedCategory === category && styles.categoryButtonActive,
+              ]}
+            >
+              <Text style={styles.categoryButtonText}>{category}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
         {loading ? (
           <Text style={styles.loading}>Chargement...</Text>
         ) : (
-          Object.entries(quizzesByCategory).map(([category, quizzes]) => (
+          displayedCategories.map((category) => (
             <View key={category} style={styles.section}>
-              <Text style={styles.sectionTitle}>{category}</Text>
+              <Text style={[styles.sectionTitle, isDark && styles.cardTitleDark]}>{category}</Text>
               <FlatList
-                data={quizzes}
+                data={quizzesByCategory[category] || []}
                 keyExtractor={(item) => item.id.toString()}
                 renderItem={({ item }) => renderQuizCard(item)}
                 horizontal
@@ -125,6 +171,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
+  containerDark: {
+    backgroundColor: "#0f172a",
+  },
   scrollContent: {
     padding: 16,
     paddingTop: 80,
@@ -132,7 +181,7 @@ const styles = StyleSheet.create({
   floatingButton: {
     position: "absolute",
     right: 16,
-    backgroundColor: "#6366F1",
+    backgroundColor: "#22c55e",
     borderRadius: 9999,
     padding: 10,
     zIndex: 10,
@@ -145,6 +194,8 @@ const styles = StyleSheet.create({
   title: {
     textAlign: "center",
     marginBottom: 20,
+    fontSize: 26,
+    fontWeight: "bold",
   },
   loading: {
     textAlign: "center",
@@ -159,28 +210,25 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: "#1f2937",
   },
-  cardWrapper: {
-    marginRight: 12,
+  cardTitleDark: {
+    color: "#93c5fd",
   },
-  card: {
+  categoryScroll: {
+    flexDirection: "row",
+    marginBottom: 16,
+  },
+  categoryButton: {
     backgroundColor: "#E0E7FF",
-    padding: 16,
-    borderRadius: 20,
-    minWidth: width * 0.65,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 9999,
+    marginRight: 8,
   },
-  cardTitle: {
-    fontSize: 18,
+  categoryButtonActive: {
+    backgroundColor: "#22c55e",
+  },
+  categoryButtonText: {
+    color: "#1e293b",
     fontWeight: "600",
-    marginBottom: 6,
-    color: "#1e40af",
-  },
-  cardMeta: {
-    fontSize: 14,
-    color: "#475569",
   },
 });

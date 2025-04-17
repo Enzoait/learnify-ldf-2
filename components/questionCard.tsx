@@ -16,7 +16,7 @@ interface QuestionCardProps {
 }
 
 const QuestionCard: React.FC<QuestionCardProps> = ({ index, question, handleSaveQuestion, handleDeleteQuestion }) => {
-  const colorScheme = useColorScheme(); // Obtenir le mode clair ou sombre actuel
+  const colorScheme = useColorScheme();
 
   const handleOptionChange = (optionIndex: number, value: string) => {
     const updatedOptions = [...question.options];
