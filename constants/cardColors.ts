@@ -1,0 +1,38 @@
+export const cardColors = {
+    light: {
+        Mathematics: "#FF5733",
+        Science: "#33FF57",
+        History: "#3357FF",
+        Literature: "#FF33A1",
+        Physics: "#A133FF",
+        Chemistry: "#33FFF5",
+        Biology: "#F5FF33",
+        Philosophy: "#FF8C33",
+        Economics: "#33FF8C",
+        Sociology: "#8C33FF",
+        ComputerScience: "#33A1FF",
+        ArtHistory: "#FF3333",
+        Geography: "#33FFA1",
+        MusicTheory: "#A1FF33",
+        Astronomy: "#FF33F5",
+        Psychology: "#5733FF"
+    },
+    dark: {
+        Mathematics: "#FF704D",
+        Science: "#4DFF70",
+        History: "#4D70FF",
+        Literature: "#FF4DB8",
+        Physics: "#B84DFF",
+        Chemistry: "#4DFFF0",
+        Biology: "#F0FF4D",
+        Philosophy: "#FF9C4D",
+        Economics: "#4DFF9C",
+        Sociology: "#9C4DFF",
+        ComputerScience: "#4DB8FF",
+        ArtHistory: "#FF4D4D",
+        Geography: "#4DFFB8",
+        MusicTheory: "#B8FF4D",
+        Astronomy: "#FF4DF0",
+        Psychology: "#704DFF"
+    },
+};

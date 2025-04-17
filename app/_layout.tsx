@@ -4,6 +4,7 @@ import { Slot } from "expo-router";
 import { View } from "react-native";
 
 import { SupabaseProvider, useSupabase } from "@/context/supabase-provider";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 function RootLayoutNav() {
 	const { onLayoutRootView } = useSupabase();
@@ -18,7 +19,9 @@ function RootLayoutNav() {
 export default function AppLayout() {
 	return (
 		<SupabaseProvider>
-			<RootLayoutNav />
+			<GestureHandlerRootView style={{ flex: 1 }}>
+				<RootLayoutNav />
+			</GestureHandlerRootView>
 		</SupabaseProvider>
 	);
 }

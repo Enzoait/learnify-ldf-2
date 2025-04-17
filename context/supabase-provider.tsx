@@ -28,6 +28,9 @@ type SupabaseContextProps = {
 		question: string,
 		answer: string,
 	) => Promise<void>;
+	getCards: () =>
+		| Promise<{ success: boolean; data?: any[]; message?: string }>
+		| undefined;
 };
 
 type SupabaseProviderProps = {
@@ -44,6 +47,7 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
 	onLayoutRootView: async () => {},
 	getCategories: async () => ({ success: false, message: "Not implemented" }),
 	createCard: async () => {},
+	getCards: async () => ({ success: false, message: "Not implemented" }),
 });
 
 export const useSupabase = () => useContext(SupabaseContext);
@@ -123,6 +127,28 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		}
 	};
 
+	const getCards = async () => {
+		try {
+			const { data, error } = await supabase.from("Cards").select("*");
+			if (error) {
+				throw new Error(error.message);
+			}
+
+			return { success: true, data };
+		} catch (err: unknown) {
+			if (err instanceof Error) {
+				console.error(
+					"Erreur lors de la récupération des catégories:",
+					err.message,
+				);
+				return { success: false, message: err.message };
+			}
+
+			console.error("Erreur inconnue");
+			return { success: false, message: "Erreur inconnue" };
+		}
+	};
+
 	useEffect(() => {
 		async function prepare() {
 			try {
@@ -184,6 +210,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				onLayoutRootView,
 				getCategories,
 				createCard,
+				getCards,
 			}}
 		>
 			{children}
