@@ -10,14 +10,16 @@ import Dropdown from "@/components/ui/dropdown";
 import { useSupabase } from "@/context/supabase-provider";
 import { Form, FormField, FormInput } from "@/components/ui/form";
 import { useState } from "react";
+import { useColorScheme } from "@/lib/useColorScheme";
 
 const formSchema = z.object({
-	categorie: z.string(),
+	categorie: z.string().nonempty("This field is required"),
 	question: z.string().nonempty("This field is required"),
 	answer: z.string().nonempty("This field is required"),
 });
 
 export default function Modal() {
+	const colorScheme = useColorScheme();
 	const { createCard } = useSupabase();
 
 	const [category, setCategory] = useState(null);
@@ -50,6 +52,11 @@ export default function Modal() {
 			</Muted>
 			<View className="flex flex-1 gap-4">
 				<Dropdown sendValue={(value) => form.setValue("categorie", value)} />
+				{form.formState.errors.categorie && (
+					<Text style={{ color: "red" }}>
+						{form.formState.errors.categorie.message}
+					</Text>
+				)}
 				<Form {...form}>
 					<View className="gap-4">
 						<FormField
@@ -90,7 +97,13 @@ export default function Modal() {
 					{form.formState.isSubmitting ? (
 						<ActivityIndicator size="small" />
 					) : (
-						<Text className="text-gray-400">Créer</Text>
+						<Text
+							style={{
+								color: colorScheme.colorScheme === "dark" ? "#000" : "#fff",
+							}}
+						>
+							Créer
+						</Text>
 					)}
 				</Button>
 			</View>

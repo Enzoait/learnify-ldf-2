@@ -1,8 +1,7 @@
-import React, { useState, useEffect, SetStateAction } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Text } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import { useSupabase } from "@/context/supabase-provider";
-import { PropsWithChildren } from "react";
 
 interface Category {
 	created_at: string;
