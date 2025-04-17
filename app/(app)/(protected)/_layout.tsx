@@ -1,12 +1,15 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Image } from "react-native";
+import { usePathname } from "expo-router";
 
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { Image } from "@/components/image";
 
 export default function ProtectedLayout() {
 	const { colorScheme } = useColorScheme();
+	const currentPath = usePathname();
+	const pagesToHideTabBar = ['/qcm/create'];
 
 	return (
 		<Tabs
@@ -17,6 +20,7 @@ export default function ProtectedLayout() {
 						colorScheme === "dark"
 							? colors.dark.background
 							: colors.light.background,
+					display: pagesToHideTabBar.some((page) => currentPath.includes(page)) ? 'none' : 'flex',
 				},
 				tabBarActiveTintColor:
 					colorScheme === "dark"
@@ -33,6 +37,22 @@ export default function ProtectedLayout() {
 						<Image
 							source={require("@/assets/card.png")}
 							style={{ width: size, height: size, tintColor: color }}
+						/>
+					),
+				}}
+			/>
+			<Tabs.Screen
+				name="qcm"
+				options={{
+					title: "Quiz",
+					tabBarIcon: ({ color, size }) => (
+						<Image
+						source={require("@/assets/quiz.png")}
+						style={{
+							width: size,
+							height: size,
+							tintColor: color,
+						}}
 						/>
 					),
 				}}
