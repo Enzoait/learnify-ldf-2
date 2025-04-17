@@ -54,11 +54,7 @@
     "extra": {
       "router": {
         "origin": false
-      },
-      "eas": {
-        "projectId": "e90e605c-8470-4483-8e0e-d1e610b9923f"
       }
-    },
-    "owner": "hugo.kaba"
+    }
   }
 }
