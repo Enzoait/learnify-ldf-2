@@ -20,7 +20,14 @@ type SupabaseContextProps = {
 	signInWithPassword: (email: string, password: string) => Promise<void>;
 	signOut: () => Promise<void>;
 	onLayoutRootView: () => Promise<void>;
-	getCategories: () => Promise<{ success: boolean; data?: any[]; message?: string }> | undefined;
+	getCategories: () =>
+		| Promise<{ success: boolean; data?: any[]; message?: string }>
+		| undefined;
+	createCard: (
+		category: string,
+		question: string,
+		answer: string,
+	) => Promise<void>;
 };
 
 type SupabaseProviderProps = {
@@ -36,6 +43,7 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
 	signOut: async () => {},
 	onLayoutRootView: async () => {},
 	getCategories: async () => ({ success: false, message: "Not implemented" }),
+	createCard: async () => {},
 });
 
 export const useSupabase = () => useContext(SupabaseContext);
@@ -97,6 +105,24 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		}
 	};
 
+	const createCard = async (
+		category: string,
+		question: string,
+		answer: string,
+	) => {
+		const { data: userData, error: userError } = await supabase.auth.getUser();
+		const user = userData.user;
+		const { error } = await supabase.from("Cards").insert({
+			category: category,
+			question: question,
+			answer: answer,
+			user_id: user?.id,
+		});
+		if (error) {
+			throw error;
+		}
+	};
+
 	useEffect(() => {
 		async function prepare() {
 			try {
@@ -107,7 +133,9 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				setUser(session ? session.user : null);
 				setInitialized(true);
 
-				const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+				const {
+					data: { subscription },
+				} = supabase.auth.onAuthStateChange((_event, session) => {
 					setSession(session);
 					setUser(session ? session.user : null);
 				});
@@ -119,7 +147,6 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				setAppIsReady(true);
 			}
 		}
-
 		prepare();
 	}, []);
 
@@ -156,6 +183,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				signOut,
 				onLayoutRootView,
 				getCategories,
+				createCard,
 			}}
 		>
 			{children}
