@@ -1,29 +1,41 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, SetStateAction } from "react";
 import { View, StyleSheet, Text } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import { useSupabase } from "@/context/supabase-provider";
+import { PropsWithChildren } from "react";
 
 interface Category {
-    created_at: string;
-    title: string;
-    id: string;
+	created_at: string;
+	title: string;
+	id: string;
 }
 
-export default function Dropdown() {
-	const [value, setValue] = useState(null);
+export default function Dropdown({
+	sendValue,
+}: {
+	sendValue: (value: string) => void;
+}) {
+	const [value, setValue] = useState<string | null>(null);
 	const [categories, setCategories] = useState<Category[]>([]);
 	const { getCategories } = useSupabase();
+
+	function handleValueChange(selectedId: string | null) {
+		setValue(selectedId);
+
+		const selectedCategory = categories.find((c) => c.id === selectedId);
+		const label = selectedCategory?.title ?? "";
+
+		sendValue(label);
+	}
 
 	useEffect(() => {
 		async function fetchCategories() {
 			const result = await getCategories();
-            if (result === undefined) {
-                throw new Error("getCategories is not defined");
-            }
+			if (result === undefined) {
+				throw new Error("getCategories is not defined");
+			}
 			if (result?.success && result.data) {
-				setCategories(
-					result.data
-				);
+				setCategories(result.data);
 			}
 		}
 		fetchCategories();
@@ -32,11 +44,11 @@ export default function Dropdown() {
 	return (
 		<View style={styles.container}>
 			<RNPickerSelect
-				onValueChange={(value) => setValue(value)}
+				onValueChange={(value) => handleValueChange(value)}
 				items={categories.map((category) => ({
-                    label: category.title,
-                    value: category.id,
-                }))}
+					label: category.title,
+					value: category.id,
+				}))}
 				placeholder={{ label: "Catégorie", value: null }}
 			/>
 		</View>

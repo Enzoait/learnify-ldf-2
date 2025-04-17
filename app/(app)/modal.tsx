@@ -9,6 +9,7 @@ import { StyleSheet } from "react-native";
 import Dropdown from "@/components/ui/dropdown";
 import { useSupabase } from "@/context/supabase-provider";
 import { Form, FormField, FormInput } from "@/components/ui/form";
+import { useState } from "react";
 
 const formSchema = z.object({
 	categorie: z.string(),
@@ -17,7 +18,9 @@ const formSchema = z.object({
 });
 
 export default function Modal() {
-	const { signUp } = useSupabase();
+	const { createCard } = useSupabase();
+
+	const [category, setCategory] = useState(null);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -30,7 +33,7 @@ export default function Modal() {
 
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		try {
-			//await signUp(data.email, data.password);
+			await createCard(data.categorie, data.question, data.answer);
 
 			form.reset();
 		} catch (error: Error | any) {
@@ -46,7 +49,7 @@ export default function Modal() {
 				propres cartes en remplissant les champs.
 			</Muted>
 			<View className="flex flex-1 gap-4">
-				<Dropdown />
+				<Dropdown sendValue={(value) => form.setValue("categorie", value)} />
 				<Form {...form}>
 					<View className="gap-4">
 						<FormField
