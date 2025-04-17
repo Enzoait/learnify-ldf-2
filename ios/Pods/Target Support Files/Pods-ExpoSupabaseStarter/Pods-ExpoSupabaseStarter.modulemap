@@ -1,0 +1,6 @@
+module Pods_ExpoSupabaseStarter {
+  umbrella header "Pods-ExpoSupabaseStarter-umbrella.h"
+
+  export *
+  module * { export * }
+}
