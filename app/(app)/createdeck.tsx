@@ -14,13 +14,12 @@ import { useColorScheme } from "@/lib/useColorScheme";
 
 const formSchema = z.object({
 	categorie: z.string().nonempty("This field is required"),
-	question: z.string().nonempty("This field is required"),
-	answer: z.string().nonempty("This field is required"),
+	title: z.string().nonempty("This field is required"),
 });
 
-export default function Modal() {
+export default function CreateDeck() {
 	const colorScheme = useColorScheme();
-	const { createCard } = useSupabase();
+	const { createDecks } = useSupabase();
 
 	const [category, setCategory] = useState(null);
 
@@ -28,14 +27,13 @@ export default function Modal() {
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			categorie: "",
-			question: "",
-			answer: "",
+			title: "",
 		},
 	});
 
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		try {
-			await createCard(data.categorie, data.question, data.answer);
+			await createDecks(data.categorie, data.title);
 
 			form.reset();
 		} catch (error: Error | any) {
@@ -45,10 +43,11 @@ export default function Modal() {
 
 	return (
 		<View className="flex flex-1 justify-center bg-background p-4 gap-y-4">
-			<H1 className="text-center">Création d'une nouvelle carte</H1>
+			<H1 className="text-center">Création d'un nouveau deck</H1>
 			<Muted className="text-center">
-				Bienvenue dans l'outil de création de cartes. Ici, vous pouvez créer vos
-				propres cartes en remplissant les champs.
+				Bienvenue dans l'outil de création de decks. Ici, vous pouvez créer vos
+				propres decks en remplissant les champs. Séléctionnez ensuite des cartes
+				à ajouter à votre deck.
 			</Muted>
 			<View className="flex flex-1 gap-4">
 				<Dropdown sendValue={(value) => form.setValue("categorie", value)} />
@@ -61,24 +60,11 @@ export default function Modal() {
 					<View className="gap-4">
 						<FormField
 							control={form.control}
-							name="question"
+							name="title"
 							render={({ field }) => (
 								<FormInput
-									label="Question"
-									placeholder="Question"
-									autoCapitalize="none"
-									autoCorrect={false}
-									{...field}
-								/>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="answer"
-							render={({ field }) => (
-								<FormInput
-									label="Answer"
-									placeholder="Answer"
+									label="Titre"
+									placeholder="Titre"
 									autoCapitalize="none"
 									autoCorrect={false}
 									{...field}
