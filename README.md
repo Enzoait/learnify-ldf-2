@@ -1,6 +1,6 @@
-# 💻 Application Overview
+# Learnify 🃏
 
-The application is pretty simple. Users can sign up, sign in, and sign out.
+Learnify is a React Native app that allows you to make decks, add cards to these decks and study your courses.
 
 ## Get Started
 
