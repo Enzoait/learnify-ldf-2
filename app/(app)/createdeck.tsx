@@ -50,7 +50,10 @@ export default function CreateDeck() {
 				à ajouter à votre deck.
 			</Muted>
 			<View className="flex flex-1 gap-4">
-				<Dropdown sendValue={(value) => form.setValue("categorie", value)} />
+				<Dropdown
+					sendValue={(value) => form.setValue("categorie", value)}
+					type="categorie"
+				/>
 				{form.formState.errors.categorie && (
 					<Text style={{ color: "red" }}>
 						{form.formState.errors.categorie.message}
