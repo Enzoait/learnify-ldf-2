@@ -9,7 +9,7 @@ import { Image } from "@/components/image";
 export default function ProtectedLayout() {
 	const { colorScheme } = useColorScheme();
 	const currentPath = usePathname();
-	const pagesToHideTabBar = ['/qcm/create'];
+	const pagesToHideTabBar = ["/qcm/create"];
 
 	return (
 		<Tabs
@@ -20,7 +20,9 @@ export default function ProtectedLayout() {
 						colorScheme === "dark"
 							? colors.dark.background
 							: colors.light.background,
-					display: pagesToHideTabBar.some((page) => currentPath.includes(page)) ? 'none' : 'flex',
+					display: pagesToHideTabBar.some((page) => currentPath.includes(page))
+						? "none"
+						: "flex",
 				},
 				tabBarActiveTintColor:
 					colorScheme === "dark"
@@ -30,7 +32,7 @@ export default function ProtectedLayout() {
 			}}
 		>
 			<Tabs.Screen
-				name="index"
+				name="deck"
 				options={{
 					title: "Home",
 					tabBarIcon: ({ color, size }) => (
@@ -47,12 +49,12 @@ export default function ProtectedLayout() {
 					title: "Quiz",
 					tabBarIcon: ({ color, size }) => (
 						<Image
-						source={require("@/assets/quiz.png")}
-						style={{
-							width: size,
-							height: size,
-							tintColor: color,
-						}}
+							source={require("@/assets/quiz.png")}
+							style={{
+								width: size,
+								height: size,
+								tintColor: color,
+							}}
 						/>
 					),
 				}}

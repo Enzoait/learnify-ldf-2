@@ -9,22 +9,41 @@ interface Category {
 	id: string;
 }
 
+interface Decks {
+	id: number;
+	title: string;
+	category: string;
+	created_at: string;
+}
+
 export default function Dropdown({
 	sendValue,
+	type,
 }: {
-	sendValue: (value: string) => void;
+	sendValue: (value: any) => void;
+	type: string;
 }) {
 	const [value, setValue] = useState<string | null>(null);
 	const [categories, setCategories] = useState<Category[]>([]);
-	const { getCategories } = useSupabase();
+	const [decks, setDecks] = useState<Decks[]>([]);
+	const { getCategories, getDecks } = useSupabase();
 
-	function handleValueChange(selectedId: string | null) {
+	function handleValueChange(selectedId: string | null ) {
 		setValue(selectedId);
+		if (selectedId === null) {
+			sendValue("");
+			return;
+		}
+		const selectedItem =
+			type == "categorie"
+				? categories.find((c) => c.id === selectedId)
+				: decks.find((d) => d.id === parseInt(selectedId));
+		const valueToSend =
+			type == "categorie"
+				? (selectedItem?.title ?? "")
+				: (selectedItem?.id ?? "");
 
-		const selectedCategory = categories.find((c) => c.id === selectedId);
-		const label = selectedCategory?.title ?? "";
-
-		sendValue(label);
+		sendValue(valueToSend);
 	}
 
 	useEffect(() => {
@@ -40,16 +59,40 @@ export default function Dropdown({
 		fetchCategories();
 	}, [getCategories]);
 
+	useEffect(() => {
+		async function fetchDecks() {
+			const result = await getDecks();
+			if (result === undefined) {
+				throw new Error("getDecks is not defined");
+			}
+			if (result?.success && result.data) {
+				setDecks(result.data);
+			}
+		}
+		fetchDecks();
+	}, [getDecks]);
+
 	return (
 		<View style={styles.container}>
-			<RNPickerSelect
-				onValueChange={(value) => handleValueChange(value)}
-				items={categories.map((category) => ({
-					label: category.title,
-					value: category.id,
-				}))}
-				placeholder={{ label: "Catégorie", value: null }}
-			/>
+			{type === "categorie" ? (
+				<RNPickerSelect
+					onValueChange={(value) => handleValueChange(value)}
+					items={categories.map((category) => ({
+						label: category.title,
+						value: category.id,
+					}))}
+					placeholder={{ label: "Catégorie", value: null }}
+				/>
+			) : (
+				<RNPickerSelect
+					onValueChange={(value) => handleValueChange(value)}
+					items={decks.map((deck) => ({
+						label: deck.title,
+						value: deck.id,
+					}))}
+					placeholder={{ label: "Deck", value: null }}
+				/>
+			)}
 		</View>
 	);
 }

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 
-import { H1, Muted } from "@/components/ui/typography";
+import { H1, Muted, P } from "@/components/ui/typography";
 import { StyleSheet } from "react-native";
 import Dropdown from "@/components/ui/dropdown";
 import { useSupabase } from "@/context/supabase-provider";
@@ -16,6 +16,7 @@ const formSchema = z.object({
 	categorie: z.string().nonempty("This field is required"),
 	question: z.string().nonempty("This field is required"),
 	answer: z.string().nonempty("This field is required"),
+	deck_id: z.number().min(1, "This field is required"),
 });
 
 export default function Modal() {
@@ -30,12 +31,18 @@ export default function Modal() {
 			categorie: "",
 			question: "",
 			answer: "",
+			deck_id: 0,
 		},
 	});
 
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		try {
-			await createCard(data.categorie, data.question, data.answer);
+			await createCard(
+				data.categorie,
+				data.question,
+				data.answer,
+				data.deck_id,
+			);
 
 			form.reset();
 		} catch (error: Error | any) {
@@ -51,7 +58,10 @@ export default function Modal() {
 				propres cartes en remplissant les champs.
 			</Muted>
 			<View className="flex flex-1 gap-4">
-				<Dropdown sendValue={(value) => form.setValue("categorie", value)} />
+				<Dropdown
+					sendValue={(value) => form.setValue("categorie", value)}
+					type="categorie"
+				/>
 				{form.formState.errors.categorie && (
 					<Text style={{ color: "red" }}>
 						{form.formState.errors.categorie.message}
@@ -87,6 +97,15 @@ export default function Modal() {
 						/>
 					</View>
 				</Form>
+				<Dropdown
+					sendValue={(value) => form.setValue("deck_id", value)}
+					type="deck"
+				/>
+				{form.formState.errors.deck_id && (
+					<Text style={{ color: "red" }}>
+						{form.formState.errors.deck_id.message}
+					</Text>
+				)}
 				<Button
 					size="default"
 					variant="default"

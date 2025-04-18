@@ -27,9 +27,13 @@ type SupabaseContextProps = {
 		category: string,
 		question: string,
 		answer: string,
+		deck_id: number,
 	) => Promise<void>;
 	createDecks: (category: string, title: string) => Promise<void>;
 	getCards: () =>
+		| Promise<{ success: boolean; data?: any[]; message?: string }>
+		| undefined;
+	getDecks: () =>
 		| Promise<{ success: boolean; data?: any[]; message?: string }>
 		| undefined;
 };
@@ -50,6 +54,7 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
 	createCard: async () => {},
 	createDecks: async () => {},
 	getCards: async () => ({ success: false, message: "Not implemented" }),
+	getDecks: async () => ({ success: false, message: "Not implemented" }),
 });
 
 export const useSupabase = () => useContext(SupabaseContext);
@@ -115,6 +120,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		category: string,
 		question: string,
 		answer: string,
+		deck_id: number,
 	) => {
 		const { data: userData, error: userError } = await supabase.auth.getUser();
 		const user = userData.user;
@@ -123,6 +129,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 			question: question,
 			answer: answer,
 			user_id: user?.id,
+			deck_id: deck_id,
 		});
 		if (error) {
 			throw error;
@@ -145,6 +152,28 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 	const getCards = async () => {
 		try {
 			const { data, error } = await supabase.from("Cards").select("*");
+			if (error) {
+				throw new Error(error.message);
+			}
+
+			return { success: true, data };
+		} catch (err: unknown) {
+			if (err instanceof Error) {
+				console.error(
+					"Erreur lors de la récupération des catégories:",
+					err.message,
+				);
+				return { success: false, message: err.message };
+			}
+
+			console.error("Erreur inconnue");
+			return { success: false, message: "Erreur inconnue" };
+		}
+	};
+
+	const getDecks = async () => {
+		try {
+			const { data, error } = await supabase.from("Decks").select("*");
 			if (error) {
 				throw new Error(error.message);
 			}
@@ -197,7 +226,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		const inProtectedGroup = segments[1] === "(protected)";
 
 		if (session && !inProtectedGroup) {
-			router.replace("/(app)/(protected)");
+			router.replace("/(app)/(protected)/deck/");
 		} else if (!session) {
 			router.replace("/(app)/welcome");
 		}
@@ -227,6 +256,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				createCard,
 				createDecks,
 				getCards,
+				getDecks,
 			}}
 		>
 			{children}
