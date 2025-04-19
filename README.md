@@ -33,11 +33,11 @@ yarn start
 
 6. Une fois l'application lancée, vous devrez vous créer un compte, merci de saisir comme domaine pour le mail `@supabase.co` !
 
-- Exemple : 
-- - ```sh
-  Email : test@supabase.co
-  Mot de passe : Mot de passe de plus de 8 caractères avec au moins 1 caractère spécial
-  ```
+Exemple : 
+ ```sh
+ Email : test@supabase.co
+ Mot de passe : Mot de passe de plus de 8 caractères avec au moins 1 caractère spécial
+ ```
 
 # 📝 **Gestion des QCM et Notifications**
 
