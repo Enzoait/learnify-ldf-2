@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import {
+	View,
+	StyleSheet,
+	Text,
+	Animated,
+	ScrollView,
+	TouchableOpacity,
+} from "react-native";
 import RNPickerSelect from "react-native-picker-select";
 import { useSupabase } from "@/context/supabase-provider";
+import { useColorScheme } from "react-native";
 
 interface Category {
 	created_at: string;
@@ -23,12 +31,16 @@ export default function Dropdown({
 	sendValue: (value: any) => void;
 	type: string;
 }) {
+	const colorScheme = useColorScheme();
+	const isDarkMode = colorScheme === "dark";
 	const [value, setValue] = useState<string | null>(null);
 	const [categories, setCategories] = useState<Category[]>([]);
 	const [decks, setDecks] = useState<Decks[]>([]);
 	const { getCategories, getDecks } = useSupabase();
+	const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
+	const [dropdownHeight] = useState(new Animated.Value(0));
 
-	function handleValueChange(selectedId: string | null ) {
+	function handleValueChange(selectedId: string | null) {
 		setValue(selectedId);
 		if (selectedId === null) {
 			sendValue("");
@@ -72,33 +84,124 @@ export default function Dropdown({
 		fetchDecks();
 	}, [getDecks]);
 
+	const toggleDropdown = () => {
+		setDropdownVisible(!dropdownVisible);
+
+		Animated.timing(dropdownHeight, {
+			toValue: dropdownVisible ? 0 : 200,
+			duration: 300,
+			useNativeDriver: false,
+		}).start();
+	};
+
 	return (
 		<View style={styles.container}>
 			{type === "categorie" ? (
-				<RNPickerSelect
-					onValueChange={(value) => handleValueChange(value)}
-					items={categories.map((category) => ({
-						label: category.title,
-						value: category.id,
-					}))}
-					placeholder={{ label: "Catégorie", value: null }}
-				/>
+				<>
+					<TouchableOpacity
+						onPress={toggleDropdown}
+						style={[
+							styles.picker,
+							isDarkMode ? { backgroundColor: "#1a1a1a" } : {},
+						]}
+					>
+						<Text style={isDarkMode ? styles.darkText : styles.lightText}>
+							{value !== null
+								? categories.find((cat) => cat.id === value)?.title
+								: "Sélectionner une catégorie"}
+						</Text>
+					</TouchableOpacity>
+					{dropdownVisible && (
+						<Animated.View style={[styles.dropdownContainer]}>
+							<ScrollView style={styles.dropdownList}>
+								{categories.map((item) => (
+									<TouchableOpacity
+										key={item.id}
+										style={styles.dropdownItem}
+										onPress={() => {
+											setValue(item.id);
+											handleValueChange(item.id);
+											toggleDropdown();
+										}}
+									>
+										<Text style={styles.dropdownText}>{item.title}</Text>
+									</TouchableOpacity>
+								))}
+							</ScrollView>
+						</Animated.View>
+					)}
+				</>
 			) : (
-				<RNPickerSelect
-					onValueChange={(value) => handleValueChange(value)}
-					items={decks.map((deck) => ({
-						label: deck.title,
-						value: deck.id,
-					}))}
-					placeholder={{ label: "Deck", value: null }}
-				/>
+				<>
+					<TouchableOpacity
+						onPress={toggleDropdown}
+						style={[
+							styles.picker,
+							isDarkMode ? { backgroundColor: "#1a1a1a" } : {},
+						]}
+					>
+						<Text style={isDarkMode ? styles.darkText : styles.lightText}>
+							{value !== null
+								? decks.find((deck) => deck.id.toString() === value)?.title
+								: "Sélectionner un deck"}
+						</Text>
+					</TouchableOpacity>
+					{dropdownVisible && (
+						<Animated.View style={[styles.dropdownContainer]}>
+							<ScrollView style={styles.dropdownList}>
+								{decks.map((item) => (
+									<TouchableOpacity
+										key={item.id}
+										style={styles.dropdownItem}
+										onPress={() => {
+											setValue(item.id.toString());
+											handleValueChange(item.id.toString());
+											toggleDropdown();
+										}}
+									>
+										<Text style={styles.dropdownText}>{item.title}</Text>
+									</TouchableOpacity>
+								))}
+							</ScrollView>
+						</Animated.View>
+					)}
+				</>
 			)}
 		</View>
 	);
 }
 
 const styles = StyleSheet.create({
+	picker: {
+		padding: 10,
+		borderWidth: 1,
+		borderColor: "#ccc",
+		borderRadius: 5,
+	},
+	lightText: {
+		color: "#000",
+	},
+	darkText: {
+		color: "#fff",
+	},
 	container: {
 		justifyContent: "center",
+	},
+	dropdownContainer: {
+		backgroundColor: "#fff",
+		borderRadius: 5,
+		elevation: 5,
+		padding: 10,
+	},
+	dropdownList: {
+		maxHeight: 200,
+	},
+	dropdownItem: {
+		padding: 10,
+		borderBottomWidth: 1,
+		borderBottomColor: "#ccc",
+	},
+	dropdownText: {
+		fontSize: 16,
 	},
 });

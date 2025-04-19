@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, Button, Platform, Switch, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Platform, Switch, StyleSheet } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
+import { useSupabase } from '@/context/supabase-provider';
+import { Button } from '@/components/ui/button';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -21,6 +23,7 @@ export default function App() {
   const [enabled, setEnabled] = useState(false);
   const notificationListener = useRef();
   const responseListener = useRef();
+  const { signOut } = useSupabase();
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(token => token && setExpoPushToken(token));
@@ -72,25 +75,54 @@ export default function App() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Titre :</Text>
-      <TextInput style={styles.input} value={notificationTitle} onChangeText={setNotificationTitle} />
+		<View style={styles.container}>
+			<Text style={styles.label}>Titre :</Text>
+			<TextInput
+				style={styles.input}
+				value={notificationTitle}
+				onChangeText={setNotificationTitle}
+			/>
 
-      <Text style={styles.label}>Contenu :</Text>
-      <TextInput style={styles.input} value={notificationBody} onChangeText={setNotificationBody} />
+			<Text style={styles.label}>Contenu :</Text>
+			<TextInput
+				style={styles.input}
+				value={notificationBody}
+				onChangeText={setNotificationBody}
+			/>
 
-      <Text style={styles.label}>Heure (HH):</Text>
-      <TextInput style={styles.input} keyboardType="numeric" value={hour} onChangeText={setHour} maxLength={2} />
+			<Text style={styles.label}>Heure (HH):</Text>
+			<TextInput
+				style={styles.input}
+				keyboardType="numeric"
+				value={hour}
+				onChangeText={setHour}
+				maxLength={2}
+			/>
 
-      <Text style={styles.label}>Minute (MM):</Text>
-      <TextInput style={styles.input} keyboardType="numeric" value={minute} onChangeText={setMinute} maxLength={2} />
+			<Text style={styles.label}>Minute (MM):</Text>
+			<TextInput
+				style={styles.input}
+				keyboardType="numeric"
+				value={minute}
+				onChangeText={setMinute}
+				maxLength={2}
+			/>
 
-      <View style={styles.switchContainer}>
-        <Text style={styles.label}>Activer notification quotidienne :</Text>
-        <Switch value={enabled} onValueChange={setEnabled} />
-      </View>
-    </View>
-  );
+			<View style={styles.switchContainer}>
+				<Text style={styles.label}>Activer notification quotidienne :</Text>
+				<Switch value={enabled} onValueChange={setEnabled} />
+			</View>
+
+			<Button
+				className="w-full"
+				size="default"
+				variant="default"
+				onPress={signOut}
+			>
+				<Text>Se déconnecter</Text>
+			</Button>
+		</View>
+	);
 }
 
 async function registerForPushNotificationsAsync() {

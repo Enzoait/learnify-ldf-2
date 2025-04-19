@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   containerDark: {
-    backgroundColor: "#0f172a",
+    backgroundColor: "#000",
   },
   scrollContent: {
     padding: 16,

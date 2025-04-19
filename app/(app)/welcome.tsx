@@ -18,10 +18,10 @@ export default function WelcomeScreen() {
 					source={require("@/assets/icon.png")}
 					className="w-16 h-16 rounded-xl"
 				/>
-				<H1 className="text-center">Bienvenue sur learnify</H1>
+				<H1 className="text-center">Bienvenue sur Learnify</H1>
 				<Muted className="text-center">
 					Une application pour apprendre et réviser vos cours de manière
-					efficace et ludique.
+					efficace et ludique.🃏
 					{"\n"}Créez un compte pour commencer à apprendre dès maintenant !
 					{"\n"}Déjà un compte ? Connectez-vous pour retrouver vos progrès et
 					vos cours.
@@ -44,7 +44,7 @@ export default function WelcomeScreen() {
 						router.push("/sign-in");
 					}}
 				>
-					<Text>se Connectez</Text>
+					<Text>Se Connecter</Text>
 				</Button>
 			</View>
 		</SafeAreaView>

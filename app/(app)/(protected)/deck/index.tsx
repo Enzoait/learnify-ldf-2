@@ -34,6 +34,7 @@ export default function Home() {
 
 	return (
 		<View className="flex-1 bg-background p-4">
+			<View className="h-[50]"></View>
 			<H1 className="text-center">Decks</H1>
 			<Muted className="text-center mb-2">
 				Bienvenue sur la page des decks {"\n"} Ici vous pouvez retrouver vos

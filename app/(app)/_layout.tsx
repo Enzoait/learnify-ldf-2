@@ -19,7 +19,7 @@ export default function AppLayout() {
 				options={{
 					presentation: "modal",
 					headerShown: true,
-					headerTitle: "Sign Up",
+					headerTitle: "Inscription",
 					headerStyle: {
 						backgroundColor:
 							colorScheme === "dark"

@@ -183,7 +183,13 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 
 	const getCards = async () => {
 		try {
-			const { data, error } = await supabase.from("Cards").select("*");
+			const { data: userData, error: userError } =
+				await supabase.auth.getUser();
+			const user = userData.user;
+			const { data, error } = await supabase
+				.from("Cards")
+				.select("*")
+				.eq("user_id", user?.id);
 			if (error) {
 				throw new Error(error.message);
 			}
@@ -192,7 +198,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 		} catch (err: unknown) {
 			if (err instanceof Error) {
 				console.error(
-					"Erreur lors de la récupération des catégories:",
+					"Erreur lors de la récupération des cartes:",
 					err.message,
 				);
 				return { success: false, message: err.message };
@@ -205,7 +211,13 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 
 	const getDecks = async () => {
 		try {
-			const { data, error } = await supabase.from("Decks").select("*");
+			const { data: userData, error: userError } =
+				await supabase.auth.getUser();
+			const user = userData.user;
+			const { data, error } = await supabase
+				.from("Decks")
+				.select("*")
+				.eq("user_id", user?.id);
 			if (error) {
 				throw new Error(error.message);
 			}
@@ -213,10 +225,7 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 			return { success: true, data };
 		} catch (err: unknown) {
 			if (err instanceof Error) {
-				console.error(
-					"Erreur lors de la récupération des catégories:",
-					err.message,
-				);
+				console.error("Erreur lors de la récupération des decks:", err.message);
 				return { success: false, message: err.message };
 			}
 

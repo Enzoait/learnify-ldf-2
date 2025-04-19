@@ -12,28 +12,28 @@ import { useSupabase } from "@/context/supabase-provider";
 
 const formSchema = z
 	.object({
-		email: z.string().email("Please enter a valid email address."),
+		email: z.string().email("Veuillez entrer une adresse e-mail valide."),
 		password: z
 			.string()
-			.min(8, "Please enter at least 8 characters.")
-			.max(64, "Please enter fewer than 64 characters.")
+			.min(8, "Veuillez entrer au moins 8 caractères.")
+			.max(64, "Veuillez entrer moins de 64 caractères.")
 			.regex(
 				/^(?=.*[a-z])/,
-				"Your password must have at least one lowercase letter.",
+				"Votre mot de passe doit contenir au moins une lettre minuscule.",
 			)
 			.regex(
 				/^(?=.*[A-Z])/,
-				"Your password must have at least one uppercase letter.",
+				"Votre mot de passe doit contenir au moins une lettre majuscule.",
 			)
-			.regex(/^(?=.*[0-9])/, "Your password must have at least one number.")
+			.regex(/^(?=.*[0-9])/, "Votre mot de passe doit contenir au moins un chiffre.")
 			.regex(
 				/^(?=.*[!@#$%^&*])/,
-				"Your password must have at least one special character.",
+				"Votre mot de passe doit contenir au moins un caractère spécial.",
 			),
-		confirmPassword: z.string().min(8, "Please enter at least 8 characters."),
+		confirmPassword: z.string().min(8, "Veuillez entrer au moins 8 caractères."),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
-		message: "Your passwords do not match.",
+		message: "Vos mots de passe ne correspondent pas.",
 		path: ["confirmPassword"],
 	});
 
@@ -62,7 +62,7 @@ export default function SignUp() {
 	return (
 		<SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
 			<View className="flex-1 gap-4 web:m-4">
-				<H1 className="self-start">Sign Up</H1>
+				<H1 className="self-start">Inscription</H1>
 
 				<Form {...form}>
 					<View className="gap-4">
@@ -86,8 +86,8 @@ export default function SignUp() {
 							name="password"
 							render={({ field }) => (
 								<FormInput
-									label="Password"
-									placeholder="Password"
+									label="Mot de passe"
+									placeholder="Mot de passe"
 									autoCapitalize="none"
 									autoCorrect={false}
 									secureTextEntry
@@ -100,8 +100,8 @@ export default function SignUp() {
 							name="confirmPassword"
 							render={({ field }) => (
 								<FormInput
-									label="Confirm Password"
-									placeholder="Confirm password"
+									label="Confirmer le mot de passe"
+									placeholder="Confirmer le mot de passe"
 									autoCapitalize="none"
 									autoCorrect={false}
 									secureTextEntry
@@ -122,7 +122,7 @@ export default function SignUp() {
 				{form.formState.isSubmitting ? (
 					<ActivityIndicator size="small" />
 				) : (
-					<Text>Sign Up</Text>
+					<Text>S'inscrire</Text>
 				)}
 			</Button>
 		</SafeAreaView>
