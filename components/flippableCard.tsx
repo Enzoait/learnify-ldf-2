@@ -87,7 +87,7 @@ export default function FlippableCard({
 						className="bg-transparent"
 					>
 						<Text className="" style={styles.buttonText}>
-							See answer
+							Voir la réponse
 						</Text>
 					</Button>
 				</Animated.View>
@@ -156,7 +156,7 @@ export default function FlippableCard({
 						className="bg-transparent"
 					>
 						<Text className="" style={styles.buttonText}>
-							Hide answer
+							Cacher la réponse
 						</Text>
 					</Button>
 				</Animated.View>

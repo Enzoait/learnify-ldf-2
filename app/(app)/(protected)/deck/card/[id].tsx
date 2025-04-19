@@ -70,7 +70,7 @@ export default function CardsPage() {
 			<TouchableOpacity onPress={() => router.back()} style={styles.backIcon}>
 				<ArrowLeft color={"gray"} size={24} />
 			</TouchableOpacity>
-			<H1 className="text-center">Cartes {decks.map((deck) => (deck.title))}</H1>
+			<H1 className="text-center">Cartes {decks.map((deck) => deck.title)}</H1>
 			<Muted className="text-center mb-2">
 				Bienvenue sur la page des cartes. {"\n"} Swipez pour les faire défiler.
 			</Muted>

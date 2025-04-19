@@ -36,6 +36,8 @@ type SupabaseContextProps = {
 	getDecks: () =>
 		| Promise<{ success: boolean; data?: any[]; message?: string }>
 		| undefined;
+	updateDecks: (id: number, title: string) => Promise<void>;
+	deleteDecks: (id: number) => Promise<void>;
 };
 
 type SupabaseProviderProps = {
@@ -53,6 +55,8 @@ export const SupabaseContext = createContext<SupabaseContextProps>({
 	getCategories: async () => ({ success: false, message: "Not implemented" }),
 	createCard: async () => {},
 	createDecks: async () => {},
+	updateDecks: async () => {},
+	deleteDecks: async () => {},
 	getCards: async () => ({ success: false, message: "Not implemented" }),
 	getDecks: async () => ({ success: false, message: "Not implemented" }),
 });
@@ -144,6 +148,34 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 			title: title,
 			user_id: user?.id,
 		});
+		if (error) {
+			throw error;
+		}
+	};
+
+	const updateDecks = async (id: number, title: string) => {
+		const { data: userData, error: userError } = await supabase.auth.getUser();
+		const user = userData.user;
+		const { error } = await supabase
+			.from("Decks")
+			.update({
+				title: title,
+			})
+			.eq("id", id)
+			.eq("user_id", user?.id);
+		if (error) {
+			throw error;
+		}
+	};
+
+	const deleteDecks = async (id: number) => {
+		const { data: userData, error: userError } = await supabase.auth.getUser();
+		const user = userData.user;
+		const { error } = await supabase
+			.from("Decks")
+			.delete()
+			.eq("id", id)
+			.eq("user_id", user?.id);
 		if (error) {
 			throw error;
 		}
@@ -255,6 +287,8 @@ export const SupabaseProvider = ({ children }: SupabaseProviderProps) => {
 				getCategories,
 				createCard,
 				createDecks,
+				updateDecks,
+				deleteDecks,
 				getCards,
 				getDecks,
 			}}
